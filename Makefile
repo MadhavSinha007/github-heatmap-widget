@@ -1,27 +1,38 @@
 APP_NAME=github-heatmap
-PYTHON=python3
-SCRIPT=heatmap.py
-INSTALL_DIR=$(HOME)/.local/bin
+PY_FILE=heatmap.py
 
-.PHONY: run install uninstall deps clean
+SHELL := /bin/bash
 
-run:
-	$(PYTHON) $(SCRIPT)
-
-deps:
-	sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-gdkx11-4.0 curl
+.PHONY: install setup run clean
 
 install:
-	mkdir -p $(INSTALL_DIR)
-	cp $(SCRIPT) $(INSTALL_DIR)/$(APP_NAME)
-	chmod +x $(INSTALL_DIR)/$(APP_NAME)
-	@echo "Installed to $(INSTALL_DIR)/$(APP_NAME)"
-	@echo "You can now run it using:"
-	@echo "$(APP_NAME)"
+	@echo "Installing dependencies (Debian/Ubuntu)..."
+	sudo apt update
+	sudo apt install -y \
+		python3 \
+		python3-gi \
+		gir1.2-gtk-4.0 \
+		gir1.2-gdkx11-4.0 \
+		libgtk-4-1 \
+		libgirepository1.0-dev \
+		gobject-introspection \
+		curl
 
-uninstall:
-	rm -f $(INSTALL_DIR)/$(APP_NAME)
-	@echo "Uninstalled."
+setup:
+	@echo "----------------------------------"
+	@read -p "Enter your GitHub username: " username; \
+	if [ -z "$$username" ]; then \
+		echo "Username cannot be empty!"; \
+		exit 1; \
+	fi; \
+	sed -i "s/GitHubFetcher(\"USERNAME\")/GitHubFetcher(\"$$username\")/" $(PY_FILE); \
+	echo "Username updated successfully."
+	@echo "----------------------------------"
+
+run:
+	@echo "Running $(APP_NAME)..."
+	python3 $(PY_FILE)
 
 clean:
-	find . -type d -name "__pycache__" -exec rm -r {} +
+	@echo "Reverting username back to placeholder..."
+	sed -i 's/GitHubFetcher(".*")/GitHubFetcher("USERNAME")/' $(PY_FILE)

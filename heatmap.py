@@ -117,7 +117,7 @@ class DesktopWidget(Gtk.Window):
         box = Gtk.Box()
         handle.set_child(box)
 
-        fetcher = GitHubFetcher("USERNAME")  # change username
+        fetcher = GitHubFetcher("SUnset-06")  # change username
         data = fetcher.fetch()
         heatmap = Heatmap(data, fetcher.color)
         box.append(heatmap)
